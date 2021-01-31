@@ -243,7 +243,7 @@ async def on_raw_reaction_remove(payload):
     logger.debug(f'---- on_raw_reaction_remove ----\npayload:{payload}')
     if not is_reaction_valid(payload):
         return
-   logger.info(f'Remove Reaction | User id: {payload.user_id} | Message_id: {payload.message_id} | Reaction: {payload.emoji}')
+    logger.info(f'Remove Reaction | User id: {payload.user_id} | Message_id: {payload.message_id} | Reaction: {payload.emoji}')
 
     # Clear internal player map only if emoji is allowed and is present
     if ( payload.emoji.name in poll['emoji'] ) and ( payload.emoji.name in poll['players'][payload.user_id] ):
