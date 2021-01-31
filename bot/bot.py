@@ -159,22 +159,22 @@ def is_reaction_valid(payload, test_for_bot = False):
 
     # ignore the bot itself
     if test_for_bot and payload.member.name == bot_user_name:
-        logger.info('Ignoring bot')
+        logger.debug('Ignoring bot')
         return False
    
     # No vote in action
     if not is_poll_ongoing():
-        logger.warning('No ongoing vote')
+        logger.debug('No ongoing vote')
         return False
 
     # Message is not the ongoing poll
     if poll['message'].id != payload.message_id:
-        logger.warning(f'Message reaction is not current poll')
+        logger.debug(f'Message reaction is not current poll')
         return False
 
      # Emoji not in list
     if payload.emoji.name not in poll['emoji']:
-        logger.warning(f'Message reaction is not in accepted list ({payload.emoji.name})')
+        logger.debug(f'Message reaction is not in accepted list ({payload.emoji.name})')
         return False
     
     return True
@@ -203,10 +203,9 @@ async def on_raw_reaction_add(payload):
     global poll
 
     logger.debug(f'---- on_raw_reaction_add ----\npayload:{payload}')
-    logger.info(f'Add Reaction | User: {payload.member.name} | User id: {payload.user_id} | Message_id: {payload.message_id} | Reaction: {payload.emoji}')
-
     if not is_reaction_valid(payload, test_for_bot = True):
         return
+    logger.info(f'Add Reaction | User: {payload.member.name} | User id: {payload.user_id} | Message_id: {payload.message_id} | Reaction: {payload.emoji}')
 
     # Add player to the map if it doesn't exists
     if payload.user_id not in poll['players']:
@@ -221,6 +220,7 @@ async def on_raw_reaction_add(payload):
     # Stop the poll if stop emoji is clicked by someone else than the bot
     elif payload.emoji.name.startswith("stop") and payload.member.name != bot_user_name:
         logger.info(f'poll stopped by {payload.member.name}')
+        poll['solution'] = get_groups(format_players_for_group_lib(), GROUP_SIZE)
         await display_poll_result()
         poll['message'] = None
 
@@ -228,9 +228,6 @@ async def on_raw_reaction_add(payload):
     # Useful if the first player click is not a role emoji, but still an emoji of the authorized array
     if len(poll['players'][payload.user_id]) == 0:
          del poll['players'][payload.user_id]
-
-    # Compute solution
-    poll['solution'] = get_groups(format_players_for_group_lib(), GROUP_SIZE)
 
     logger.debug(poll['players'])
 
@@ -244,10 +241,9 @@ async def on_raw_reaction_remove(payload):
     global poll
 
     logger.debug(f'---- on_raw_reaction_remove ----\npayload:{payload}')
-    logger.info(f'Remove Reaction | User id: {payload.user_id} | Message_id: {payload.message_id} | Reaction: {payload.emoji}')
-
     if not is_reaction_valid(payload):
         return
+   logger.info(f'Remove Reaction | User id: {payload.user_id} | Message_id: {payload.message_id} | Reaction: {payload.emoji}')
 
     # Clear internal player map only if emoji is allowed and is present
     if ( payload.emoji.name in poll['emoji'] ) and ( payload.emoji.name in poll['players'][payload.user_id] ):
@@ -256,9 +252,6 @@ async def on_raw_reaction_remove(payload):
     # if all roles have been removed from player, let's clean it
     if len(poll['players'][payload.user_id]) == 0:
          del poll['players'][payload.user_id]
-
-    # Compute solution
-    poll['solution'] = get_groups(format_players_for_group_lib(), GROUP_SIZE)
 
     logger.debug(poll['players'])
 
