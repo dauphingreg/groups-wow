@@ -211,8 +211,6 @@ async def on_raw_reaction_add(payload):
     if payload.user_id not in poll['players']:
         poll['players'][payload.user_id] = {}
 
-    logger.warn(f'stop:{payload.emoji.name.startswith("stop")}')
-
     # Update internal player map
     if payload.emoji.name in poll['emoji'] and not payload.emoji.name.startswith("stop"):
         poll['players'][payload.user_id][payload.emoji.name] = payload.member.name
