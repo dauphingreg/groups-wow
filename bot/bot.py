@@ -308,4 +308,8 @@ if __name__ == "__main__":
     poll['context'] = None
     poll['solution'] = None
     poll['start'] = time.gmtime(0)
+    if TOKEN != None:
+        logger.info(f'Discord token is found: {TOKEN[0:4]}...{TOKEN[-4:]}')
+    else:
+        logger.error(f'No token defined')
     bot.run(TOKEN)
